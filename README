@@ -1,0 +1,13 @@
+just a stupid gui wrapper around portablemc.
+for <serious gaming> you should probably use portablemc.
+
+build dependencies:
+  - python3
+  - pip install pyinstaller portablemc tkinter sv-ttk
+
+build windows version:
+  $ make all
+
+get a pre-built executable:
+  - windows:      https://pub.krzysckh.org/pmc-gui.exe
+  - x86_64-linux: https://pub.krzysckh.org/pmc-gui-linux-x86-64
