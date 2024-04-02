@@ -11,6 +11,7 @@ import re
 import os.path
 import os
 import json
+import sys
 
 import tkinter
 from tkinter import ttk
@@ -165,11 +166,11 @@ def start_minecraft():
       v = ForgeVersion()
     elif m := re.search("^forge:(.*)$", v_text):
       s = m.group(1)
-      if s.find("-"):
+      if s.find("-") != -1:
         log(f"good luck - you're on your own. i hope `{v_text}' contains a valid ForgeVersion")
         v = ForgeVersion(s)
       else:
-        sm = re.search("(\\d+\\.\\d+(?:\\.\\d+)?)")
+        sm = re.search("(\\d+\\.\\d+(?:\\.\\d+)?)", s)
         v = ForgeVersion(f"{sm.group(1)}-recommended")
     elif m := re.search("^optifine:(\\d+\\.\\d+(?:\\.\\d+)?)$", v_text):
       v = get_optifine(m.group(1))
@@ -280,7 +281,7 @@ def main():
     pass
 
   write_lp_json()
-  root.protocol("WM_DELETE_WINDOW", lambda: [save_prefs(), exit(0)])
+  root.protocol("WM_DELETE_WINDOW", lambda: [save_prefs(), sys.exit()])
   load_prefs()
   root.mainloop()
 

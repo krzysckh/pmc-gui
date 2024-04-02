@@ -15,7 +15,7 @@ get a pre-built executable:
   - windows 7+ (x86):  https://pub.krzysckh.org/pmc-gui-winlegacy.exe
   - x86_64-linux:      https://pub.krzysckh.org/pmc-gui-linux-x86-64
 
-version can be one of:
+Version can be one of:
   - vanilla:
     * newest or latest
     * game.version.number (e.g. 1.8.8 or 1.12)
@@ -26,4 +26,3 @@ version can be one of:
     * forge:newest or forge:latest
     * forge:game.version.number (e.g. forge:1.12.2 or forge:1.7.10)
     * forge:game.version.number-explicit.forge.version (e.g. 1.20.1-47.1.0)
-
