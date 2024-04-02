@@ -20,6 +20,17 @@ start_btn: ttk.Button
 ta: tkinter.Text
 sl: ttk.Checkbutton
 
+download_dir: str
+
+if os.name == 'nt':
+  download_dir = os.path.join(os.getenv("APPDATA"), "pmc-gui")
+  if not os.path.exists(download_dir):
+    os.mkdir(download_dir)
+else:
+  download_dir = os.path.join(os.getenv("HOME"), ".local", "share", "pmc-gui")
+  if not os.path.exists(download_dir):
+    os.mkdir(download_dir)
+
 def log(s: str) -> None:
   ta.config(state=tkinter.NORMAL)
   ta.insert("end", f"{s}\n")
@@ -28,6 +39,7 @@ def log(s: str) -> None:
 def get_all_optifine_versions() -> Version:
   log("GET https://optifine.net/downloads")
   html = requests.get("https://optifine.net/downloads").text;
+  log("OK")
   s = bs.BeautifulSoup(html)
   els = map(lambda v: re.search('(?<=\\?f=)(.*\\.jar)', v["href"]).group(1), s.select("td.colDownload > a"))
 
@@ -36,17 +48,21 @@ def get_all_optifine_versions() -> Version:
 def dl_optifine_version(version: str) -> bool:
   log(f"GET https://optifine.net/adloadx?f={version}");
   dl = requests.get(f"https://optifine.net/adloadx?f={version}").text;
+  log("OK")
   url = "https://optifine.net/{}".format(
     bs.BeautifulSoup(dl).select(".downloadButton > a")[0]["href"]
   );
 
-  log(f"GET {url}")
-  if not os.path.exists(version):
+  path = os.path.join(download_dir, version)
+  if not os.path.exists(path):
+    log(f"GET {url}")
+    log(f"downloading to {path}")
     with requests.get(url, stream=True) as r:
       r.raise_for_status()
-      with open(version, 'wb') as f:
+      with open(path, 'wb') as f:
         for chunk in r.iter_content(chunk_size=8192):
           f.write(chunk)
+    log("OK")
     return True
   return False
 
@@ -75,12 +91,16 @@ def get_optifine(version: str) -> Version:
   log(f"get_optifine version name: {name}")
   return Version(name)
 
+def find_java() -> str:
+  if os.name == 'nt':
+    return os.path.join(os.getenv("APPDATA"), ".minecraft", "jvm", "jre-legacy", "bin", "java.exe")
+  return "java"
+
 def java_run(thing) -> None:
-  v = Version()
-  v._resolve_jvm(Watcher())
-  java = v._jvm_path
-  log(f"running: java -jar {thing}")
-  os.system(f"java -jar {thing}")
+  java = find_java()
+  run = os.path.join(download_dir, thing)
+  log(f"running: {java} -jar {run}")
+  os.system(f"{java} -jar {run}")
 
 def get_optifine_newest() -> Version:
   log("get_optifine_newest")
@@ -116,14 +136,14 @@ def start_minecraft():
   elif v_text == "optifine:newest":
     v = get_optifine_newest()
   elif m := re.search("^optifine:(\\d+\\.\\d+(?:\\.\\d+)?)$", v_text):
-
     v = get_optifine(m.group(1))
   else:
     v = Version(v_text)
 
   v.set_auth_offline(nick, None)
+  log("installing...")
   env: Environment = v.install()
-  log("starting minecraft...")
+  log(f"starting Minecraft {v_text}...")
   env.run()
   start_btn.config(state="normal")
 
@@ -166,6 +186,12 @@ def main():
 
   sv_ttk.set_theme("dark")
   log("started correctly")
+  try:
+    if os.name == 'nt':
+      root.iconbitmap(os.path.join(os.path.dirname(__file__), "icon.ico"))
+  except:
+    print("ups")
+    pass
   root.mainloop()
 
 if __name__ == "__main__":
