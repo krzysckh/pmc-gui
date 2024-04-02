@@ -11,3 +11,9 @@ build windows version:
 get a pre-built executable:
   - windows:      https://pub.krzysckh.org/pmc-gui.exe
   - x86_64-linux: https://pub.krzysckh.org/pmc-gui-linux-x86-64
+
+version can be one of:
+  - optifine:newest
+  - optifine:version.name.number (e.g. optifine:1.12.2 or optifine:1.19)
+  - newest
+  - version.name.number (e.g. 1.8.8 or 1.12)
