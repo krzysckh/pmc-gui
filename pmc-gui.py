@@ -18,6 +18,7 @@ v_ent: ttk.Entry
 n_ent: ttk.Entry
 start_btn: ttk.Button
 ta: tkinter.Text
+sl: ttk.Checkbutton
 
 def log(s: str) -> None:
   ta.config(state=tkinter.NORMAL)
@@ -25,6 +26,7 @@ def log(s: str) -> None:
   ta.config(state=tkinter.DISABLED)
 
 def get_all_optifine_versions() -> Version:
+  log("GET https://optifine.net/downloads")
   html = requests.get("https://optifine.net/downloads").text;
   s = bs.BeautifulSoup(html)
   els = map(lambda v: re.search('(?<=\\?f=)(.*\\.jar)', v["href"]).group(1), s.select("td.colDownload > a"))
@@ -32,11 +34,13 @@ def get_all_optifine_versions() -> Version:
   return els
 
 def dl_optifine_version(version: str) -> bool:
-  dl = requests.get("https://optifine.net/adloadx?f={}".format(version)).text;
+  log(f"GET https://optifine.net/adloadx?f={version}");
+  dl = requests.get(f"https://optifine.net/adloadx?f={version}").text;
   url = "https://optifine.net/{}".format(
     bs.BeautifulSoup(dl).select(".downloadButton > a")[0]["href"]
   );
 
+  log(f"GET {url}")
   if not os.path.exists(version):
     with requests.get(url, stream=True) as r:
       r.raise_for_status()
@@ -51,24 +55,24 @@ def get_optifine_version_type(s: str) -> list:
   return [m.group(1), m.group(2)]
 
 def get_optifine(version: str) -> Version:
-  log("get_optifine")
+  log(f"get_optifine {version}")
   els = get_all_optifine_versions()
 
   chosen = list(filter(lambda s: s.find(f"{version}_") != -1, els))[0]
 
   # install chosen version without optifine
-  log("install V w-out optifine")
+  log(f"installing version {version} (without optifine)")
   temp = Version(version)
   temp.set_auth_offline("", None)
   temp.install()
 
-  log(f"install optifine {chosen}")
+  log(f"installing version {chosen} (with optifine)")
   if dl_optifine_version(chosen):
     java_run(chosen)
 
   v, T = get_optifine_version_type(chosen)
   name = "{}-OptiFine_{}".format(v, T)
-  log(f"get_optifine with {name}")
+  log(f"get_optifine version name: {name}")
   return Version(name)
 
 def java_run(thing) -> None:
@@ -85,16 +89,17 @@ def get_optifine_newest() -> Version:
 
   v, T = get_optifine_version_type(newest)
 
-  log("install V w-out optifine")
+  log(f"installing version {v} (without optifine)")
   temp = Version(v)
   temp.set_auth_offline("", None)
   temp.install()
 
-  log(f"install optifine {newest}")
+  log(f"installing version {newest} (with optifine)")
   if dl_optifine_version(newest):
     java_run(newest)
 
   name = "{}-OptiFine_{}".format(v, T)
+  log(f"get_optifine_newest version name: {name}")
   return Version(name)
 
   # vs = list(filter(lambda v: v.id == name, list(Context().list_versions())))
@@ -104,6 +109,7 @@ def start_minecraft():
   start_btn.config(state="disabled")
   v_text: str = v_ent.get()
   nick: str = n_ent.get()
+  log(f"loading minecraft: v: {v_text}, nick: {nick} (\"OFFLINE\" MODE)")
   v: Version = None
   if v_text == "newest":
     v = Version()
@@ -117,6 +123,7 @@ def start_minecraft():
 
   v.set_auth_offline(nick, None)
   env: Environment = v.install()
+  log("starting minecraft...")
   env.run()
   start_btn.config(state="normal")
 
@@ -130,7 +137,7 @@ def main():
 
   v_text: ttk.Label = ttk.Label(master=root, text="version: ")
   v_ent = ttk.Entry(master=root)
-  v_ent.insert("end", "optifine:1.12.2")
+  v_ent.insert("end", "optifine:newest")
   v_text.pack(fill="both", expand=False, padx=5)
   v_ent.pack(fill="both", expand=False, padx=5, pady=5)
 
@@ -144,10 +151,21 @@ def main():
                          command=lambda: Thread(target=start_minecraft).start())
   start_btn.pack(fill="both", expand=False, padx=5, pady=5)
 
+  def show_ta():
+    ta.pack(fill="both", expand=False, padx=5, pady=5)
+    sl.configure(command=hide_ta)
+
+  def hide_ta():
+    ta.pack_forget(); sl.configure(command=show_ta)
+
+  sl = ttk.Checkbutton(master=root, style="Switch.TCheckbutton", text="show debug log",
+                       command=show_ta)
+  sl.pack(fill="both", expand=False, padx=5, pady=5)
+
   ta = tkinter.Text(master=root, state=tkinter.DISABLED)
-  ta.pack(fill="both", expand=False, padx=5, pady=5)
 
   sv_ttk.set_theme("dark")
+  log("started correctly")
   root.mainloop()
 
 if __name__ == "__main__":
