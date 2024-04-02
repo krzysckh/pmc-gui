@@ -16,7 +16,14 @@ get a pre-built executable:
   - x86_64-linux:      https://pub.krzysckh.org/pmc-gui-linux-x86-64
 
 version can be one of:
-  - optifine:newest
-  - optifine:version.name.number (e.g. optifine:1.12.2 or optifine:1.19)
-  - newest
-  - version.name.number (e.g. 1.8.8 or 1.12)
+  - vanilla:
+    * newest or latest
+    * game.version.number (e.g. 1.8.8 or 1.12)
+  - optifine: (you need to click `Install' on the optifine popup)
+    * optifine:newest or optifine:latest
+    * optifine:game.version.number (e.g. optifine:1.12.2 or optifine:1.19)
+  - forge:
+    * forge:newest or forge:latest
+    * forge:game.version.number (e.g. forge:1.12.2 or forge:1.7.10)
+    * forge:game.version.number-explicit.forge.version (e.g. 1.20.1-47.1.0)
+

@@ -4,7 +4,7 @@ WIN_PYINSTALLER=~/.wine/drive_c/users/kpm/AppData/Local/Programs/Python/Python31
 WIN_PYINSTALLER_OLD=~/.wine/drive_c/users/kpm/AppData/Local/Programs/Python/Python38-32/Scripts/pyinstaller.exe
 
 PIFLAGS=-F -w -i ./icon.ico --collect-data sv_ttk --collect-data requests \
-    --collect-data bs4
+    --collect-data bs4 --collect-data json
 
 .PHONY: all build wine-install-deps wine-run pubcpy clean
 
