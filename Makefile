@@ -4,9 +4,11 @@ WIN_PYINSTALLER=~/.wine/drive_c/users/kpm/AppData/Local/Programs/Python/Python31
 PIFLAGS=-F -w -i ./icon.ico --collect-data sv_ttk --collect-data requests \
     --collect-data bs4
 
+.PHONY: all build wine-install-deps wine-run pubcpy clean
+
 all: dist/pmc-gui.exe dist/pmc-gui
 build: all
-install-deps:
+wine-install-deps:
 	wine $(WIN_PY) -m pip install -r requirements.txt
 wine-run:
 	wine $(WIN_PY) pmc-gui.py
