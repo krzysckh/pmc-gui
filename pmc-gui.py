@@ -21,6 +21,7 @@ import sv_ttk
 v_ent: ttk.Entry
 n_ent: ttk.Entry
 start_btn: ttk.Button
+clear_cache_b: ttk.Button
 ta: tkinter.Text
 sl: ttk.Checkbutton
 
@@ -147,8 +148,9 @@ def get_optifine_newest() -> Version:
   # vs = list(filter(lambda v: v.id == name, list(Context().list_versions())))
   # version = vs[0];
 
+
 def start_minecraft():
-  start_btn.config(state="disabled")
+  disable_btns()
   v_text: str = v_ent.get()
   nick: str = n_ent.get()
   log(f"loading minecraft: v: {v_text}, nick: {nick} (\"OFFLINE\" MODE)")
@@ -174,7 +176,7 @@ def start_minecraft():
       v = Version(v_text)
   except Exception as e:
     log(f"Couldn't start {v_text}: {str(e)}")
-    reset_sbtn()
+    reset_btns()
     return
 
   v.set_auth_offline(nick, None)
@@ -184,7 +186,7 @@ def start_minecraft():
     env = v.install()
   except Exception as e:
     log(f"couldn't install() {v_text}: {str(e)}")
-    reset_sbtn()
+    reset_btns()
     return
 
   log(f"starting Minecraft {v_text}...")
@@ -192,14 +194,21 @@ def start_minecraft():
     env.run(PMCRunner())
   except Exception as e:
     log(f"Stopped minecraft {v_text}: {str(e)}")
-    reset_sbtn()
+    reset_btns()
     return
 
   log(f"Minecraft {v_text} exited successfully")
-  reset_sbtn()
+  reset_btns()
 
-def reset_sbtn() -> None:
-  start_btn.config(state="normal")
+def set_btns_state(s) -> None:
+  start_btn.config(state=s)
+  clear_cache_b.config(state=s)
+
+def disable_btns() -> None:
+  set_btns_state("disabled")
+
+def reset_btns() -> None:
+  set_btns_state("normal")
 
 def get_prefs_path() -> str:
   return os.path.join(download_dir, "pmc-prefs.json")
@@ -220,12 +229,16 @@ def load_prefs() -> None:
       n_ent.insert(0, p["uname"])
 
 def clear_cache() -> None:
+  disable_btns()
+
   fs = list(filter(lambda s: s.find('.jar') != -1, os.listdir(download_dir)))
   for f in fs:
     os.unlink(os.path.join(download_dir, f))
 
+  reset_btns()
+
 def main():
-  global v_ent, n_ent, info_text, start_btn, ta, download_dir
+  global v_ent, n_ent, info_text, start_btn, ta, download_dir, clear_cache_b
 
   # %APPDATA%/pmc-gui on windows, ~/.local/share/pmc-gui on unix
   if os.name == 'nt':
