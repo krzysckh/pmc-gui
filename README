@@ -11,9 +11,13 @@ build windows version:
   $ make
 
 get a pre-built executable:
-  - windows 10+:       https://pub.krzysckh.org/pmc-gui.exe
-  - windows 7+ (x86):  https://pub.krzysckh.org/pmc-gui-winlegacy.exe
-  - x86_64-linux:      https://pub.krzysckh.org/pmc-gui-linux-x86-64
+  - x86_64-linux: https://pub.krzysckh.org/pmc-gui-linux-x86-64
+  - windows 10+:  https://pub.krzysckh.org/pmc-gui.exe
+  - windows 7+:   https://pub.krzysckh.org/pmc-gui-winlegacy.exe
+    to run the -winlegacy version, you probably also need to install:
+      * vc redist (2015): https://www.microsoft.com/en-in/download/details.aspx?id=48145
+      * win7 security update: https://catalog.s.download.windowsupdate.com/d/msdownload/update/software/secu/2016/01/windows6.1-kb3126587-x64_a9c28babef00f427021b566bdc4d3adbb07deb9e.msu
+        (or for non-x64 - untested: https://www.catalog.update.microsoft.com/Search.aspx?q=KB3126587%20windows%207)
 
 Version can be one of:
   - vanilla:

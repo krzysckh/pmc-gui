@@ -12,6 +12,7 @@ import os.path
 import os
 import json
 import sys
+from functools import cmp_to_key
 
 import tkinter
 from tkinter import ttk
@@ -25,16 +26,7 @@ sl: ttk.Checkbutton
 
 download_dir: str
 
-launcher_profiles_json = """
-{
-  "profiles": {
-  },
-  "settings": {
-  },
-  "version": 3,
-  "selectedProfile": "OptiFine"
-}
-"""
+launcher_profiles_json = '{"profiles": {}, "settings": {}, "version": 3, "selectedProfile": "OptiFine"}'
 
 class PMCRunner(StreamRunner):
   def process_stream_event(self, event: Any) -> None:
@@ -119,7 +111,11 @@ def get_optifine(version: str) -> Version:
 
 def find_java() -> str:
   if os.name == 'nt':
-    return os.path.join(os.getenv("APPDATA"), ".minecraft", "jvm", "jre-legacy", "bin", "java.exe")
+    base = os.path.join(os.getenv("APPDATA"), ".minecraft", "jvm")
+    fs = list(filter(lambda s: s.find('.json') == -1, os.listdir(base)))
+    log(f'available jres: {fs} -- choosing {fs[0]}')
+    fs.sort(key=cmp_to_key(lambda a, b: -1 if b == 'jre-legacy' else 1))
+    return os.path.join(base, fs[0], "bin", "java.exe")
   return "java"
 
 def java_run(thing) -> None:
@@ -223,6 +219,11 @@ def load_prefs() -> None:
       n_ent.delete(0, tkinter.END)
       n_ent.insert(0, p["uname"])
 
+def clear_cache() -> None:
+  fs = list(filter(lambda s: s.find('.jar') != -1, os.listdir(download_dir)))
+  for f in fs:
+    os.unlink(os.path.join(download_dir, f))
+
 def main():
   global v_ent, n_ent, info_text, start_btn, ta, download_dir
 
@@ -270,6 +271,9 @@ def main():
   sl.pack(fill="both", expand=False, padx=5, pady=5)
 
   ta = tkinter.Text(master=root, state=tkinter.DISABLED)
+
+  clear_cache_b = ttk.Button(master=root, text="clear download cache", command=clear_cache)
+  clear_cache_b.pack(fill="both", expand=False, padx=20, pady=5)
 
   sv_ttk.set_theme("dark")
   log("started correctly")
