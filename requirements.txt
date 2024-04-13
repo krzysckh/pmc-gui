@@ -3,3 +3,4 @@ requests
 sv-ttk
 portablemc
 pyinstaller
+show_in_file_manager

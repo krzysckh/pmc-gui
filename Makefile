@@ -16,13 +16,16 @@ wine-install-deps:
 wine-run:
 	wine $(WIN_PY_OLD) pmc-gui.py
 dist/pmc-gui.exe: wine-install-deps
-	wine $(WIN_PYINSTALLER) $(PIFLAGS) --add-binary "icon.ico;." ./pmc-gui.py
+	wine $(WIN_PYINSTALLER) $(PIFLAGS) --add-binary "icon.ico;." \
+		--add-binary "README;." ./pmc-gui.py
 dist/pmc-gui-winlegacy.exe: wine-install-deps
 	winetricks -q win7
-	wine $(WIN_PYINSTALLER_OLD) $(PIFLAGS) --add-binary "icon.ico;." -n pmc-gui-winlegacy ./pmc-gui.py
+	wine $(WIN_PYINSTALLER_OLD) $(PIFLAGS) --add-binary "icon.ico;." \
+		--add-binary "README;." -n pmc-gui-winlegacy ./pmc-gui.py
 	winetricks -q win10
 dist/pmc-gui:
-	pyinstaller $(PIFLAGS) -n pmc-gui-linux-x86-64 ./pmc-gui.py
+	pyinstaller $(PIFLAGS) -n pmc-gui-linux-x86-64 \
+		--add-binary "README:." ./pmc-gui.py
 pubcpy:
 	[ `whoami` = 'kpm' ] || exit 1
 	cd dist && sh -c 'for f in *; do yes | pubcpy $$f; done'

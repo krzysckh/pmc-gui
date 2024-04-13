@@ -12,7 +12,9 @@ import os.path
 import os
 import json
 import sys
+import subprocess
 from functools import cmp_to_key
+from showinfm import show_in_file_manager
 
 import tkinter
 from tkinter import ttk
@@ -42,9 +44,23 @@ def log(s: str) -> None:
   ta.insert("end", f"{s}\n")
   ta.config(state=tkinter.DISABLED)
 
-def write_lp_json() -> None:
-  mc_location = os.path.join(os.getenv("HOME"), ".minecraft") if os.name != 'nt' else \
+def open_readme() -> None:
+  w = tkinter.Toplevel()
+  w.configure(width=1000, height=700)
+  w.resizable(width=False, height=False)
+  t = tkinter.Text(master=w)
+  t.pack(fill="both", expand=False, padx=5)
+  with open(os.path.join(os.path.dirname(__file__), "README"), 'r') as f:
+    for l in f.readlines():
+      t.insert("end", l)
+  t.configure(state=tkinter.DISABLED)
+
+def get_mc_location() -> str:
+  return os.path.join(os.getenv("HOME"), ".minecraft") if os.name != 'nt' else \
     os.path.join(os.getenv("APPDATA"), ".minecraft")
+
+def write_lp_json() -> None:
+  mc_location = get_mc_location()
   lp_json_location = os.path.join(mc_location, "launcher_profiles.json")
 
   if not os.path.exists(mc_location):
@@ -202,7 +218,7 @@ def start_minecraft():
 
 def set_btns_state(s) -> None:
   start_btn.config(state=s)
-  clear_cache_b.config(state=s)
+  # ...
 
 def disable_btns() -> None:
   set_btns_state("disabled")
@@ -238,7 +254,7 @@ def clear_cache() -> None:
   reset_btns()
 
 def main():
-  global v_ent, n_ent, info_text, start_btn, ta, download_dir, clear_cache_b
+  global v_ent, n_ent, info_text, start_btn, ta, download_dir
 
   # %APPDATA%/pmc-gui on windows, ~/.local/share/pmc-gui on unix
   if os.name == 'nt':
@@ -285,8 +301,21 @@ def main():
 
   ta = tkinter.Text(master=root, state=tkinter.DISABLED)
 
-  clear_cache_b = ttk.Button(master=root, text="clear download cache", command=clear_cache)
-  clear_cache_b.pack(fill="both", expand=False, padx=20, pady=5)
+  mb = tkinter.Menu(root)
+  root.config(menu=mb)
+
+  optsm = tkinter.Menu(mb, tearoff=0)
+  optsm.add_command(label="Help", command=lambda: open_readme())
+  optsm.add_command(label="Clear cache", command=clear_cache)
+  optsm.add_command(label="Open mods folder",
+                    command=lambda: show_in_file_manager(
+                      os.path.join(get_mc_location(), "mods")))
+  optsm.add_command(label="Open minecraft folder",
+                    command=lambda: show_in_file_manager(get_mc_location()))
+  optsm.add_command(label="Open pmc-gui folder",
+                    command=lambda: show_in_file_manager(download_dir))
+
+  mb.add_cascade(label='Options', menu=optsm)
 
   sv_ttk.set_theme("dark")
   log("started correctly")
