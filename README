@@ -18,6 +18,9 @@ get a pre-built executable:
       * vc redist (2015): https://www.microsoft.com/en-in/download/details.aspx?id=48145
       * win7 security update: https://catalog.s.download.windowsupdate.com/d/msdownload/update/software/secu/2016/01/windows6.1-kb3126587-x64_a9c28babef00f427021b566bdc4d3adbb07deb9e.msu
         (or for non-x64 - untested: https://www.catalog.update.microsoft.com/Search.aspx?q=KB3126587%20windows%207)
+      * (optionally) if you're getting OpenGL errors (e.g. when running in a VM), install this magic thingy
+        these are some pre-built mesa drivers.
+        https://github.com/pal1000/mesa-dist-win/releases/download/24.0.5/mesa3d-24.0.5-release-msvc.7z
 
 Version can be one of:
   - vanilla:
