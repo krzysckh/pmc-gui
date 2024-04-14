@@ -23,9 +23,9 @@ def get_base_dir() -> str:
 def loadicon(el) -> None:
   try:
     if os.name == 'nt':
-      el.iconbitmap(os.path.join(os.path.dirname(__file__), "icon.ico"))
+      el.iconbitmap(os.path.join(os.path.dirname(__file__), "..", "icon.ico"))
   except Exception as e:
-    print(f"loadicon() failed: {e}")
+    log(f"loadicon() failed: {str(e)}")
     pass
 
 def get_root():

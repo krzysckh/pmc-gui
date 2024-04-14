@@ -8,17 +8,17 @@ PIFLAGS=-F -w -i ./icon.ico --collect-data sv_ttk --collect-data requests \
 
 .PHONY: all build wine-install-deps wine-run pubcpy clean
 
-all: dist/pmc-gui.exe dist/pmc-gui dist/pmc-gui-winlegacy.exe
+all: wine-install-deps dist/pmc-gui.exe dist/pmc-gui dist/pmc-gui-winlegacy.exe
 build: all
 wine-install-deps:
 	wine $(WIN_PY) -m pip install -r requirements.txt
 	wine $(WIN_PY_OLD) -m pip install -r requirements.txt
 wine-run:
 	wine $(WIN_PY_OLD) pmc-gui.py
-dist/pmc-gui.exe: wine-install-deps
+dist/pmc-gui.exe:
 	wine $(WIN_PYINSTALLER) $(PIFLAGS) --add-binary "icon.ico;." \
 		--add-binary "README;." ./pmc-gui.py
-dist/pmc-gui-winlegacy.exe: wine-install-deps
+dist/pmc-gui-winlegacy.exe:
 	winetricks -q win7
 	wine $(WIN_PYINSTALLER_OLD) $(PIFLAGS) --add-binary "icon.ico;." \
 		--add-binary "README;." -n pmc-gui-winlegacy ./pmc-gui.py
@@ -31,3 +31,6 @@ pubcpy:
 	cd dist && sh -c 'for f in *; do yes | pubcpy $$f; done'
 clean:
 	rm -fr build dist pmc-gui.spec
+common-sense:
+	$(MAKE) clean dist/pmc-gui-winlegacy.exe
+	cd dist && yes | pubcpy pmc-gui-winlegacy.exe

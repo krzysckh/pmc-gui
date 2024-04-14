@@ -13,6 +13,7 @@ import re
 import http.server
 import http.cookiejar
 import os.path
+import subprocess
 
 import pmcgui.common as common
 from pmcgui.common import log
@@ -37,7 +38,7 @@ def get_headers() -> dict:
 
   def w_open():
     time.sleep(1)
-    webbrowser.open("127.0.0.1:6970")
+    webbrowser.open("http://localhost:6970")
 
   Thread(target=w_open).start()
   s.handle_request()
@@ -68,7 +69,16 @@ def create_session(cr: dict, headers: dict) -> requests.Session:
 
 def invalidate_cache() -> None:
   d = common.get_base_dir()
-  os.unlink(os.path.join(d, "auth-cache.json"))
+  try:
+    os.unlink(os.path.join(d, "auth-cache.json"))
+  except Exception as e:
+    log(f"cannot os.unlink(): {str(e)}")
+
+def kill_webbrowser() -> None:
+  if os.name == 'nt':
+    subprocess.Popen("taskkill /IM firefox.exe", shell=True)
+  else:
+    subprocess.Popen(f"pkill -9 firefox", shell=True)
 
 def auth_as_user():
   if has_auth_cache():
@@ -78,6 +88,8 @@ def auth_as_user():
     log("re-auth")
     h = get_headers()
     webbrowser.open('https://legacy.curseforge.com')
+    time.sleep(1)
+    kill_webbrowser()
     cookiesl = [
       browser_cookie3.firefox(domain_name='curseforge.com'),
       browser_cookie3.firefox(domain_name='.curseforge.com'),
@@ -90,6 +102,7 @@ def auth_as_user():
         cs[c.name] = c.value;
 
     save_auth_cache(cs, h)
+    log("authorized")
     return create_session(cs, h)
 
 def reauth() -> requests.Session:

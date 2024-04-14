@@ -318,29 +318,17 @@ def main():
   miscm.add_command(label="Reauthorize", command=cfauth.reauth)
 
   mb.add_cascade(label='Options', menu=optsm)
-  mb.add_cascade(label='Mods', menu=modsm)
-  mb.add_cascade(label='Misc.', menu=miscm)
+  # mb.add_cascade(label='Mods', menu=modsm)
+  # mb.add_cascade(label='Misc.', menu=miscm)
 
   sv_ttk.set_theme("dark")
-  log("READY")
   common.loadicon(root)
-
   write_lp_json()
   root.protocol("WM_DELETE_WINDOW", lambda: [save_prefs(), sys.exit()])
   load_prefs()
+
+  log("READY")
   root.mainloop()
 
 if __name__ == "__main__":
   main()
-  # s = cfauth.reauth()
-  # print(cfscrape.get_jars("https://legacy.curseforge.com/minecraft/mc-mods/jei/files/all", 1))
-  # print(cfscrape.get_page(1))
-
-  # s = cfauth.auth_as_user()
-  # print(s.cookies)
-  # print(s.headers)
-  # r = s.get('https://legacy.curseforge.com')
-  # print(r.text)
-  # print(r.status_code)
-
-  # main()
