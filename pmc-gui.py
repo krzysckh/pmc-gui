@@ -19,6 +19,12 @@ import tkinter
 from tkinter import ttk
 import sv_ttk
 
+import pmcgui.cfauth as cfauth
+import pmcgui.common as common
+from pmcgui.common import log
+import pmcgui.moddl  as moddl
+import pmcgui.cfscrape as cfscrape
+
 v_ent: ttk.Entry
 n_ent: ttk.Entry
 start_btn: ttk.Button
@@ -26,7 +32,7 @@ clear_cache_b: ttk.Button
 ta: tkinter.Text
 sl: ttk.Checkbutton
 
-download_dir: str
+base_dir: str
 
 launcher_profiles_json = '{"profiles": {}, "settings": {}, "version": 3, "selectedProfile": "OptiFine"}'
 
@@ -37,11 +43,6 @@ class PMCRunner(StreamRunner):
       pass
     else:
       log(f"PortableMC: {event}")
-
-def log(s: str) -> None:
-  ta.config(state=tkinter.NORMAL)
-  ta.insert("end", f"{s}\n")
-  ta.config(state=tkinter.DISABLED)
 
 def opend(path) -> None:
   if os.name == 'nt':
@@ -81,7 +82,7 @@ def get_all_optifine_versions() -> Version:
   log("GET https://optifine.net/downloads")
   html = requests.get("https://optifine.net/downloads").text;
   log("OK")
-  s = bs.BeautifulSoup(html)
+  s = bs.BeautifulSoup(html, features='lxml')
   els = map(lambda v: re.search('(?<=\\?f=)(.*\\.jar)', v["href"]).group(1), s.select("td.colDownload > a"))
 
   return els
@@ -94,7 +95,7 @@ def dl_optifine_version(version: str) -> bool:
     bs.BeautifulSoup(dl).select(".downloadButton > a")[0]["href"]
   );
 
-  path = os.path.join(download_dir, version)
+  path = os.path.join(base_dir, version)
   if not os.path.exists(path):
     log(f"GET {url}")
     log(f"downloading to {path}")
@@ -143,7 +144,7 @@ def find_java() -> str:
 
 def java_run(thing) -> None:
   java = find_java()
-  run = os.path.join(download_dir, thing)
+  run = os.path.join(base_dir, thing)
   log(f"running: {java} -jar {run}")
   os.system(f"{java} -jar {run}")
 
@@ -169,7 +170,6 @@ def get_optifine_newest() -> Version:
 
   # vs = list(filter(lambda v: v.id == name, list(Context().list_versions())))
   # version = vs[0];
-
 
 def start_minecraft():
   disable_btns()
@@ -233,7 +233,7 @@ def reset_btns() -> None:
   set_btns_state("normal")
 
 def get_prefs_path() -> str:
-  return os.path.join(download_dir, "pmc-prefs.json")
+  return os.path.join(base_dir, "pmc-prefs.json")
 
 def save_prefs() -> None:
   pp = get_prefs_path()
@@ -253,27 +253,20 @@ def load_prefs() -> None:
 def clear_cache() -> None:
   disable_btns()
 
-  fs = list(filter(lambda s: s.find('.jar') != -1, os.listdir(download_dir)))
+  fs = list(filter(lambda s: s.find('.jar') != -1, os.listdir(base_dir)))
   for f in fs:
-    os.unlink(os.path.join(download_dir, f))
+    os.unlink(os.path.join(base_dir, f))
 
   reset_btns()
 
 def main():
-  global v_ent, n_ent, info_text, start_btn, ta, download_dir
+  global v_ent, n_ent, info_text, start_btn, ta, base_dir
 
   # %APPDATA%/pmc-gui on windows, ~/.local/share/pmc-gui on unix
-  if os.name == 'nt':
-    download_dir = os.path.join(os.getenv("APPDATA"), "pmc-gui")
-    if not os.path.exists(download_dir):
-      os.mkdir(download_dir)
-  else:
-    download_dir = os.path.join(os.getenv("HOME"), ".local", "share", "pmc-gui")
-    if not os.path.exists(download_dir):
-      os.mkdir(download_dir)
-
+  base_dir = common.get_base_dir()
 
   root = tkinter.Tk()
+  common._root = root
 
   root.title("pmc-gui")
   root.resizable(width=False, height=False)
@@ -306,27 +299,31 @@ def main():
   sl.pack(fill="both", expand=False, padx=5, pady=5)
 
   ta = tkinter.Text(master=root, state=tkinter.DISABLED)
+  common._ta = ta
 
   mb = tkinter.Menu(root)
   root.config(menu=mb)
 
   optsm = tkinter.Menu(mb, tearoff=0)
-  optsm.add_command(label="Help", command=lambda: open_readme())
+  optsm.add_command(label="Help", command=open_readme)
   optsm.add_command(label="Clear cache", command=clear_cache)
   optsm.add_command(label="Open mods folder", command=lambda: opend(os.path.join(get_mc_location(), "mods")))
   optsm.add_command(label="Open minecraft folder", command=lambda: opend(get_mc_location()))
-  optsm.add_command(label="Open pmc-gui folder", command=lambda: opend(download_dir))
+  optsm.add_command(label="Open pmc-gui folder", command=lambda: opend(base_dir))
+
+  modsm = tkinter.Menu(mb, tearoff=0)
+  modsm.add_command(label="Mod menu", command=moddl.openwindow)
+
+  miscm = tkinter.Menu(mb, tearoff=0)
+  miscm.add_command(label="Reauthorize", command=cfauth.reauth)
 
   mb.add_cascade(label='Options', menu=optsm)
+  mb.add_cascade(label='Mods', menu=modsm)
+  mb.add_cascade(label='Misc.', menu=miscm)
 
   sv_ttk.set_theme("dark")
-  log("started correctly")
-  try:
-    if os.name == 'nt':
-      root.iconbitmap(os.path.join(os.path.dirname(__file__), "icon.ico"))
-  except:
-    print("ups")
-    pass
+  log("READY")
+  common.loadicon(root)
 
   write_lp_json()
   root.protocol("WM_DELETE_WINDOW", lambda: [save_prefs(), sys.exit()])
@@ -335,4 +332,15 @@ def main():
 
 if __name__ == "__main__":
   main()
+  # s = cfauth.reauth()
+  # print(cfscrape.get_jars("https://legacy.curseforge.com/minecraft/mc-mods/jei/files/all", 1))
+  # print(cfscrape.get_page(1))
 
+  # s = cfauth.auth_as_user()
+  # print(s.cookies)
+  # print(s.headers)
+  # r = s.get('https://legacy.curseforge.com')
+  # print(r.text)
+  # print(r.status_code)
+
+  # main()
