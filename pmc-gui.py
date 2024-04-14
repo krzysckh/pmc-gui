@@ -14,7 +14,6 @@ import json
 import sys
 import subprocess
 from functools import cmp_to_key
-from showinfm import show_in_file_manager
 
 import tkinter
 from tkinter import ttk
@@ -43,6 +42,13 @@ def log(s: str) -> None:
   ta.config(state=tkinter.NORMAL)
   ta.insert("end", f"{s}\n")
   ta.config(state=tkinter.DISABLED)
+
+def opend(path) -> None:
+  if os.name == 'nt':
+    subprocess.Popen(f"explorer {path}", shell=True)
+  else:
+    subprocess.Popen(f"gtk-launch `xdg-mime query default inode/directory` {path}", shell=True)
+    pass
 
 def open_readme() -> None:
   w = tkinter.Toplevel()
@@ -307,13 +313,9 @@ def main():
   optsm = tkinter.Menu(mb, tearoff=0)
   optsm.add_command(label="Help", command=lambda: open_readme())
   optsm.add_command(label="Clear cache", command=clear_cache)
-  optsm.add_command(label="Open mods folder",
-                    command=lambda: show_in_file_manager(
-                      os.path.join(get_mc_location(), "mods")))
-  optsm.add_command(label="Open minecraft folder",
-                    command=lambda: show_in_file_manager(get_mc_location()))
-  optsm.add_command(label="Open pmc-gui folder",
-                    command=lambda: show_in_file_manager(download_dir))
+  optsm.add_command(label="Open mods folder", command=lambda: opend(os.path.join(get_mc_location(), "mods")))
+  optsm.add_command(label="Open minecraft folder", command=lambda: opend(get_mc_location()))
+  optsm.add_command(label="Open pmc-gui folder", command=lambda: opend(download_dir))
 
   mb.add_cascade(label='Options', menu=optsm)
 
