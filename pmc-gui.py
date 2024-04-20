@@ -25,12 +25,15 @@ from pmcgui.common import log
 import pmcgui.moddl  as moddl
 import pmcgui.cfscrape as cfscrape
 
+default_jvm_opts = "-Xmx2G -XX:+UnlockExperimentalVMOptions -XX:+UseG1GC -XX:G1NewSizePercent=20 -XX:G1ReservePercent=20 -XX:MaxGCPauseMillis=50 -XX:G1HeapRegionSize=32M"
+
 v_ent: ttk.Entry
 n_ent: ttk.Entry
 start_btn: ttk.Button
 clear_cache_b: ttk.Button
 ta: tkinter.Text
 sl: ttk.Checkbutton
+jvm_opts: str = default_jvm_opts
 
 base_dir: str
 
@@ -61,6 +64,19 @@ def open_readme() -> None:
     for l in f.readlines():
       t.insert("end", l)
   t.configure(state=tkinter.DISABLED)
+
+def setjopts() -> None:
+  global jvm_opts
+  w = tkinter.Toplevel()
+  t = tkinter.Text(master=w)
+  t.pack(expand=True, padx=5)
+  t.insert('end', jvm_opts)
+  w.resizable(width=False, height=False)
+  def close():
+    jvm_opts = t.get("1.0", "end-1c")
+    w.destroy()
+  b = ttk.Button(master=w, text="Ok", command=close)
+  b.pack(fill="both", expand=False, padx=5, pady=5)
 
 def get_mc_location() -> str:
   return os.path.join(os.getenv("HOME"), ".minecraft") if os.name != 'nt' else \
@@ -206,6 +222,7 @@ def start_minecraft():
   env: Environment
   try:
     env = v.install()
+    env.jvm_args = jvm_opts
   except Exception as e:
     log(f"couldn't install() {v_text}: {str(e)}")
     reset_btns()
@@ -310,6 +327,7 @@ def main():
   optsm.add_command(label="Open mods folder", command=lambda: opend(os.path.join(get_mc_location(), "mods")))
   optsm.add_command(label="Open minecraft folder", command=lambda: opend(get_mc_location()))
   optsm.add_command(label="Open pmc-gui folder", command=lambda: opend(base_dir))
+  optsm.add_command(label="Set jvm options", command=setjopts)
 
   modsm = tkinter.Menu(mb, tearoff=0)
   modsm.add_command(label="Mod menu", command=moddl.openwindow)
