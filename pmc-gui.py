@@ -222,7 +222,7 @@ def start_minecraft():
   env: Environment
   try:
     env = v.install()
-    env.jvm_args = jvm_opts
+    env.jvm_args.extend(jvm_opts.split(' '))
   except Exception as e:
     log(f"couldn't install() {v_text}: {str(e)}")
     reset_btns()
