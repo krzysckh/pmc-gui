@@ -33,3 +33,8 @@ Version can be one of:
     * forge:newest or forge:latest
     * forge:game.version.number (e.g. forge:1.12.2 or forge:1.7.10)
     * forge:game.version.number-explicit.forge.version (e.g. 1.20.1-47.1.0)
+
+a .pmcpack file is a ZIP archive containing:
+  - a VERSION file that contains the version that the mod should be ran with (e.g. forge:1.7.10 or forge:1.12.2)
+  - a mods directory that contains the mods
+  - a additional-files dir will be copied to .minecraft
