@@ -22,6 +22,7 @@ import sv_ttk
 import pmcgui.cfauth as cfauth
 import pmcgui.common as common
 from pmcgui.common import log
+from pmcgui.common import get_mc_location
 import pmcgui.moddl  as moddl
 import pmcgui.cfscrape as cfscrape
 import pmcgui.modpack as mp
@@ -81,10 +82,6 @@ def setjopts() -> None:
     w.destroy()
   b = ttk.Button(master=w, text="Ok", command=close)
   b.pack(fill="both", expand=False, padx=5, pady=5)
-
-def get_mc_location() -> str:
-  return os.path.join(os.getenv("HOME"), ".minecraft") if os.name != 'nt' else \
-    os.path.join(os.getenv("APPDATA"), ".minecraft")
 
 def write_lp_json() -> None:
   mc_location = get_mc_location()
@@ -172,7 +169,7 @@ def load_prefs() -> None:
 def clear_cache() -> None:
   disable_btns()
 
-  fs = list(filter(lambda s: s.find('.jar') != -1, os.listdir(base_dir)))
+  fs = list(filter(lambda s: s.find('.jar') != -1 or s.find('.pmcpack') != -1, os.listdir(base_dir)))
   for f in fs:
     os.unlink(os.path.join(base_dir, f))
 

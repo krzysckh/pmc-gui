@@ -117,7 +117,7 @@ def get_version(v_text, set_progress) -> Version:
       return ForgeVersion(f"{sm.group(1)}-recommended")
   elif m := re.search("^optifine:(\\d+\\.\\d+(?:\\.\\d+)?)$", v_text):
     return get_optifine(m.group(1))
-  elif m := re.search("^mod:(.*):(.*)$", v_text):
+  elif m := re.search("^mod:(.*)/(.*)$", v_text):
     ubase = m.group(1)
     name = m.group(2)
     return mp.get_modpack(ubase, name, set_progress)

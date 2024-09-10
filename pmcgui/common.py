@@ -20,6 +20,10 @@ def get_base_dir() -> str:
 
   return ret
 
+def get_mc_location() -> str:
+  return os.path.join(os.getenv("HOME"), ".minecraft") if os.name != 'nt' else \
+    os.path.join(os.getenv("APPDATA"), ".minecraft")
+
 def loadicon(el) -> None:
   try:
     if os.name == 'nt':
