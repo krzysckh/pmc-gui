@@ -61,8 +61,10 @@ def get_modpack(ubase: str, name: str, cb) -> portablemc.standard.Version:
     if os.path.exists(modpath):
       if os.path.exists(modpath_bak):
         shutil.rmtree(modpath_bak)
-      os.mkdir(modpath_bak)
-      copy_tree(modpath, modpath_bak)
+      try:
+        copy_tree(modpath, modpath_bak)
+      except Exception as e:
+        log(f'failed to backup {modpath}, continuing anyway')
     else:
       os.mkdir(modpath)
 
