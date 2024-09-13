@@ -59,6 +59,7 @@ def save_data(mpack: str, v: str) -> None:
       j['loaded-modpack'] = mpack
     if v != None:
       j['modpack-game-version'] = v
+    log(f'saving {dp}: {json.dumps(j)}')
     f.write(json.dumps(j))
 
 def get_data() -> dict:

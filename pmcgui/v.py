@@ -103,26 +103,33 @@ def get_optifine_newest() -> Version:
   return Version(name)
 
 def get_version(v_text, set_progress) -> Version:
-  common.save_data(None, None)
+  v = None
+  modded = False
   if v_text == "newest" or v_text == "latest":
-    return Version()
+    v = Version()
   elif v_text == "optifine:newest" or v_text == "optifine:latest":
-    return get_optifine_newest()
+    v = get_optifine_newest()
   elif v_text == "forge:newest" or v_text == "forge:latest":
-    return ForgeVersion()
+    v = ForgeVersion()
   elif m := re.search("^forge:(.*)$", v_text):
     s = m.group(1)
     if s.find("-") != -1:
       log(f"good luck - you're on your own. i hope `{v_text}' contains a valid ForgeVersion")
-      return ForgeVersion(s)
+      v = ForgeVersion(s)
     else:
       sm = re.search("(\\d+\\.\\d+(?:\\.\\d+)?)", s)
-      return ForgeVersion(f"{sm.group(1)}-recommended")
+      v = ForgeVersion(f"{sm.group(1)}-recommended")
   elif m := re.search("^optifine:(\\d+\\.\\d+(?:\\.\\d+)?)$", v_text):
-    return get_optifine(m.group(1))
+    v = get_optifine(m.group(1))
   elif m := re.search("^mod:(.*):(.*)$", v_text):
+    modded = True
     ubase = m.group(1)
     name = m.group(2)
-    return mp.get_modpack(ubase, name, set_progress)
+    v = mp.get_modpack(ubase, name, set_progress)
   else:
-    return Version(v_text)
+    v = Version(v_text)
+
+  if not modded:
+    common.save_data(None, None)
+
+  return v

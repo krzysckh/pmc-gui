@@ -23,7 +23,10 @@ def get_modpack(ubase: str, name: str, cb) -> portablemc.standard.Version:
   if 'loaded-modpack' in data.keys():
     if data['loaded-modpack'] == name:
       log(f'modpack {name} already loaded, launching game')
-      return v.get_version(data['modpack-game-version'], cb)
+      version = data['modpack-game-version']
+      ver = v.get_version(version, cb)
+      common.save_data(name, version)
+      return ver
 
   url = None
   if ubase in resolvable:
@@ -93,5 +96,6 @@ def get_modpack(ubase: str, name: str, cb) -> portablemc.standard.Version:
 
       cb(i+1, len(additional))
 
+    ver = v.get_version(version, cb)
     common.save_data(name, version)
-    return v.get_version(version, cb)
+    return ver
