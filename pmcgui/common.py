@@ -2,6 +2,7 @@
 import typing
 import os
 import os.path
+import json
 
 import tkinter
 
@@ -42,3 +43,27 @@ def log(s: str) -> None:
     _ta.config(state=tkinter.DISABLED)
   else:
     print(f"LOG: {s}")
+
+def get_prefs_path() -> str:
+  return os.path.join(get_base_dir(), "pmc-prefs.json")
+
+def get_data_path() -> str:
+  return os.path.join(get_base_dir(), "pmc-data.json")
+
+def save_data(mpack: str, v: str) -> None:
+  data = get_data_path()
+  dp = get_data_path()
+  with open(dp, "w") as f:
+    j = {}
+    if mpack != None:
+      j['loaded-modpack'] = mpack
+    if v != None:
+      j['modpack-game-version'] = v
+    f.write(json.dumps(j))
+
+def get_data() -> dict:
+  dp = get_data_path()
+  if os.path.exists(dp):
+    with open(dp, "r") as f:
+      return json.loads(f.read())
+  return {}

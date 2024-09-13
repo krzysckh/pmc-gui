@@ -5,8 +5,6 @@ import typing
 from threading import Thread
 from portablemc.standard import *
 from portablemc.forge import *
-import requests
-import bs4 as bs
 import re
 import os.path
 import os
@@ -148,23 +146,18 @@ def disable_btns() -> None:
 def reset_btns() -> None:
   set_btns_state("normal")
 
-def get_prefs_path() -> str:
-  return os.path.join(base_dir, "pmc-prefs.json")
-
-def save_prefs() -> None:
-  pp = get_prefs_path()
-  with open(pp, "w") as f:
-    f.write(json.dumps({'uname': n_ent.get(), 'version': v_ent.get()}))
-
 def load_prefs() -> None:
-  pp = get_prefs_path()
-  if os.path.exists(pp):
-    with open(pp, "r") as f:
-      p = json.loads(f.read())
-      v_ent.delete(0, tkinter.END)
-      v_ent.insert(0, p["version"])
-      n_ent.delete(0, tkinter.END)
-      n_ent.insert(0, p["uname"])
+  try:
+    pp = common.get_prefs_path()
+    if os.path.exists(pp):
+      with open(pp, "r") as f:
+        p = json.loads(f.read())
+        v_ent.delete(0, tkinter.END)
+        v_ent.insert(0, p["version"])
+        n_ent.delete(0, tkinter.END)
+        n_ent.insert(0, p["uname"])
+  except Exception as e:
+    log(f'failed to load preferences: {e}')
 
 def clear_cache() -> None:
   disable_btns()
@@ -174,6 +167,11 @@ def clear_cache() -> None:
     os.unlink(os.path.join(base_dir, f))
 
   reset_btns()
+
+def save_prefs() -> None:
+  pp = common.get_prefs_path()
+  with open(pp, "w") as f:
+    f.write(json.dumps({'uname': n_ent.get(), 'version': v_ent.get()}))
 
 def main():
   global v_ent, n_ent, info_text, start_btn, ta, base_dir, progressv, progress

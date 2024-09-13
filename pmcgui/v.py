@@ -9,6 +9,8 @@ from pmcgui.common import log
 import pmcgui.moddl  as moddl
 import pmcgui.cfscrape as cfscrape
 import pmcgui.modpack as mp
+import requests
+import bs4 as bs
 
 def get_all_optifine_versions() -> Version:
   log("GET https://optifine.net/downloads")
@@ -27,7 +29,7 @@ def dl_optifine_version(version: str) -> bool:
     bs.BeautifulSoup(dl).select(".downloadButton > a")[0]["href"]
   );
 
-  path = os.path.join(base_dir, version)
+  path = os.path.join(common.get_base_dir(), version)
   if not os.path.exists(path):
     log(f"GET {url}")
     log(f"downloading to {path}")
@@ -76,7 +78,7 @@ def find_java() -> str:
 
 def java_run(thing) -> None:
   java = find_java()
-  run = os.path.join(base_dir, thing)
+  run = os.path.join(common.get_base_dir(), thing)
   log(f"running: {java} -jar {run}")
   os.system(f"{java} -jar {run}")
 
@@ -101,6 +103,7 @@ def get_optifine_newest() -> Version:
   return Version(name)
 
 def get_version(v_text, set_progress) -> Version:
+  common.save_data(None, None)
   if v_text == "newest" or v_text == "latest":
     return Version()
   elif v_text == "optifine:newest" or v_text == "optifine:latest":
@@ -117,7 +120,7 @@ def get_version(v_text, set_progress) -> Version:
       return ForgeVersion(f"{sm.group(1)}-recommended")
   elif m := re.search("^optifine:(\\d+\\.\\d+(?:\\.\\d+)?)$", v_text):
     return get_optifine(m.group(1))
-  elif m := re.search("^mod:(.*)/(.*)$", v_text):
+  elif m := re.search("^mod:(.*):(.*)$", v_text):
     ubase = m.group(1)
     name = m.group(2)
     return mp.get_modpack(ubase, name, set_progress)

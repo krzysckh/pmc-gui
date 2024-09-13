@@ -18,6 +18,13 @@ resolvable = {
 }
 
 def get_modpack(ubase: str, name: str, cb) -> portablemc.standard.Version:
+  data = common.get_data()
+  log(f'{data}')
+  if 'loaded-modpack' in data.keys():
+    if data['loaded-modpack'] == name:
+      log(f'modpack {name} already loaded, launching game')
+      return v.get_version(data['modpack-game-version'], cb)
+
   url = None
   if ubase in resolvable:
     url = f"https://{resolvable[ubase]}/{name}.pmcpack"
@@ -75,15 +82,16 @@ def get_modpack(ubase: str, name: str, cb) -> portablemc.standard.Version:
       cb(i+1, len(mods))
 
     for i, a in enumerate(additional):
-      name = os.path.normpath(os.path.join(mc, a[17:]))
-      if not os.path.exists(os.path.dirname(name)):
-        os.makedirs(os.path.dirname(name))
+      nam = os.path.normpath(os.path.join(mc, a[17:]))
+      if not os.path.exists(os.path.dirname(nam)):
+        os.makedirs(os.path.dirname(nam))
 
-      p = os.path.join(mc, name)
+      p = os.path.join(mc, nam)
       if not os.path.exists(p):
         with open(p, 'wb') as f:
           f.write(z.read(a))
 
       cb(i+1, len(additional))
 
+    common.save_data(name, version)
     return v.get_version(version, cb)
