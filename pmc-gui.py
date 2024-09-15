@@ -162,7 +162,7 @@ def load_prefs() -> None:
 def clear_cache() -> None:
   disable_btns()
 
-  fs = list(filter(lambda s: s.find('.jar') != -1 or s.find('.pmcpack') != -1, os.listdir(base_dir)))
+  fs = list(filter(lambda s: s.find('.jar') != -1 or s.find('.pmcpack') != -1 or s == "pmc-data.json", os.listdir(base_dir)))
   for f in fs:
     os.unlink(os.path.join(base_dir, f))
 
