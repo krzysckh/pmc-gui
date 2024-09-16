@@ -46,7 +46,7 @@ def get_optifine_version_type(s: str) -> list:
   m = re.search('OptiFine_(\\d+\\.\\d+(?:\\.\\d+)?)_(.*).jar', s)
   return [m.group(1), m.group(2)]
 
-def get_optifine(version: str) -> Version:
+def get_optifine(version: str, watcher=None) -> Version:
   log(f"get_optifine {version}")
   els = get_all_optifine_versions()
 
@@ -56,7 +56,7 @@ def get_optifine(version: str) -> Version:
   log(f"installing version {version} (without optifine)")
   temp = Version(version)
   temp.set_auth_offline("", None)
-  temp.install()
+  temp.install(watcher=watcher)
 
   log(f"installing version {chosen} (with optifine)")
   if dl_optifine_version(chosen):
@@ -82,7 +82,7 @@ def java_run(thing) -> None:
   log(f"running: {java} -jar {run}")
   os.system(f"{java} -jar {run}")
 
-def get_optifine_newest() -> Version:
+def get_optifine_newest(watcher=None) -> Version:
   log("get_optifine_newest")
   els = get_all_optifine_versions()
   newest = list(filter(lambda s: s.find("preview") == -1, els))[0]
@@ -92,7 +92,7 @@ def get_optifine_newest() -> Version:
   log(f"installing version {v} (without optifine)")
   temp = Version(v)
   temp.set_auth_offline("", None)
-  temp.install()
+  temp.install(watcher=watcher)
 
   log(f"installing version {newest} (with optifine)")
   if dl_optifine_version(newest):
@@ -102,13 +102,13 @@ def get_optifine_newest() -> Version:
   log(f"get_optifine_newest version name: {name}")
   return Version(name)
 
-def get_version(v_text, set_progress) -> Version:
+def get_version(v_text, set_progress, watcher=None) -> Version:
   v = None
   modded = False
   if v_text == "newest" or v_text == "latest":
     v = Version()
   elif v_text == "optifine:newest" or v_text == "optifine:latest":
-    v = get_optifine_newest()
+    v = get_optifine_newest(watcher)
   elif v_text == "forge:newest" or v_text == "forge:latest":
     v = ForgeVersion()
   elif m := re.search("^forge:(.*)$", v_text):
@@ -120,7 +120,7 @@ def get_version(v_text, set_progress) -> Version:
       sm = re.search("(\\d+\\.\\d+(?:\\.\\d+)?)", s)
       v = ForgeVersion(f"{sm.group(1)}-recommended")
   elif m := re.search("^optifine:(\\d+\\.\\d+(?:\\.\\d+)?)$", v_text):
-    v = get_optifine(m.group(1))
+    v = get_optifine(m.group(1), watcher)
   elif m := re.search("^mod:(.*):(.*)$", v_text):
     modded = True
     ubase = m.group(1)

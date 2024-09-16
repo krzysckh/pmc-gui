@@ -50,6 +50,11 @@ class PMCRunner(StreamRunner):
     else:
       log(f"PortableMC: {event}")
 
+class PMCWatcher:
+  def handle(self, ev: Any):
+    if type(ev) is DownloadProgressEvent:
+      set_progress(ev.size, ev.entry.size)
+
 def opend(path) -> None:
   if os.name == 'nt':
     subprocess.Popen(f"explorer {path}", shell=True)
@@ -108,7 +113,7 @@ def start_minecraft():
   log(f"loading minecraft: v: {v_text}, nick: {nick} (\"OFFLINE\" MODE)")
   v: Version = None
   try:
-    v = get_version(v_text, set_progress)
+    v = get_version(v_text, set_progress, PMCWatcher())
   except Exception as e:
     log(f"Couldn't start {v_text}: {str(e)}")
     reset_btns()
@@ -118,7 +123,7 @@ def start_minecraft():
   log("installing...")
   env: Environment
   try:
-    env = v.install()
+    env = v.install(watcher=PMCWatcher())
     env.jvm_args.extend(jvm_opts.split(' '))
   except Exception as e:
     log(f"couldn't install() {v_text}: {str(e)}")
