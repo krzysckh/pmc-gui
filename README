@@ -40,3 +40,8 @@ a .pmcpack file is a ZIP archive containing:
   - a VERSION file that contains the version that the mod should be ran with (e.g. forge:1.7.10 or forge:1.12.2)
   - a mods directory that contains the mods
   - a additional-files dir will be copied to .minecraft
+
+development:
+  $ python3 -m venv .
+  M-x pyvenv-activate . RET
+  M-x compile RET python3 pmc-gui.py RET

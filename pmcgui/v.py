@@ -3,6 +3,7 @@
 import re
 from portablemc.standard import *
 from portablemc.forge import *
+from portablemc.forge import _NeoForgeVersion
 import pmcgui.cfauth as cfauth
 import pmcgui.common as common
 from pmcgui.common import log
@@ -119,6 +120,9 @@ def get_version(v_text, set_progress) -> Version:
     else:
       sm = re.search("(\\d+\\.\\d+(?:\\.\\d+)?)", s)
       v = ForgeVersion(f"{sm.group(1)}-recommended")
+  elif m := re.search("^neoforge:(.*)$", v_text):
+    s = m.group(1)
+    v = _NeoForgeVersion(s)
   elif m := re.search("^optifine:(\\d+\\.\\d+(?:\\.\\d+)?)$", v_text):
     v = get_optifine(m.group(1))
   elif m := re.search("^mod:(.*):(.*)$", v_text):
