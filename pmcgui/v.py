@@ -10,6 +10,7 @@ from pmcgui.common import log
 import pmcgui.moddl  as moddl
 import pmcgui.cfscrape as cfscrape
 import pmcgui.modpack as mp
+from functools import cmp_to_key
 import requests
 import bs4 as bs
 

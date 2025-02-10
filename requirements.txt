@@ -2,6 +2,6 @@ bs4
 lxml
 requests
 sv-ttk
-portablemc == 4.4.1
+portablemc[certifi] == 4.4.1
 pyinstaller
 browser_cookie3 @ git+https://github.com/krzysckh/browser_cookie3-onlyff@master

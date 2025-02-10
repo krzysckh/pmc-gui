@@ -25,6 +25,7 @@ import pmcgui.moddl  as moddl
 import pmcgui.cfscrape as cfscrape
 import pmcgui.modpack as mp
 from pmcgui.v import *
+import pmcgui.auth as auth
 
 default_jvm_opts = "-Xmx2G -XX:+UnlockExperimentalVMOptions -XX:+UseG1GC -XX:G1NewSizePercent=20 -XX:G1ReservePercent=20 -XX:MaxGCPauseMillis=50 -XX:G1HeapRegionSize=32M"
 
@@ -110,7 +111,7 @@ def start_minecraft():
   disable_btns()
   v_text: str = v_ent.get()
   nick: str = n_ent.get()
-  log(f"loading minecraft: v: {v_text}, nick: {nick} (\"OFFLINE\" MODE)")
+  log(f"loading minecraft: v: {v_text}, nick: {nick}")
   v: Version = None
   try:
     v = get_version(v_text, set_progress, PMCWatcher())
@@ -119,7 +120,15 @@ def start_minecraft():
     reset_btns()
     return
 
-  v.set_auth_offline(nick, None)
+  # maybe auth tuah
+  session = auth.maybe_get_session()
+  if session:
+    v.auth_session = session
+    log("running in authenticated mode")
+  else:
+    v.set_auth_offline(nick, None)
+    log("running in offline mode")
+
   log("installing...")
   env: Environment
   try:
@@ -229,6 +238,7 @@ def main():
 
   optsm = tkinter.Menu(mb, tearoff=0)
   optsm.add_command(label="Help", command=open_readme)
+  optsm.add_command(label="Authenticate with a Microsoft account", command=auth.ms)
   optsm.add_command(label="Clear cache", command=clear_cache)
   optsm.add_command(label="Open mods folder", command=lambda: opend(os.path.join(get_mc_location(), "mods")))
   optsm.add_command(label="Open minecraft folder", command=lambda: opend(get_mc_location()))

@@ -50,6 +50,9 @@ def get_prefs_path() -> str:
 def get_data_path() -> str:
   return os.path.join(get_base_dir(), "pmc-data.json")
 
+def get_auth_database_path():
+  return os.path.join(get_base_dir(), "AUTHDB")
+
 def save_data(mpack: str, v: str) -> None:
   data = get_data_path()
   dp = get_data_path()
