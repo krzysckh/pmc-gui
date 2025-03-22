@@ -39,6 +39,8 @@ progressv: tkinter.IntVar
 progress: ttk.Progressbar
 jvm_opts: str = default_jvm_opts
 
+debug: bool = False
+
 base_dir: str
 
 launcher_profiles_json = '{"profiles": {}, "settings": {}, "version": 3, "selectedProfile": "OptiFine"}'
@@ -54,7 +56,8 @@ class PMCRunner(StreamRunner):
 class PMCWatcher:
   def handle(self, ev: Any):
     if type(ev) is DownloadProgressEvent:
-      set_progress(ev.size, ev.entry.size)
+      if debug:
+        set_progress(ev.size, ev.entry.size)
 
 def opend(path) -> None:
   if os.name == 'nt':
@@ -216,10 +219,14 @@ def main():
   start_btn.pack(fill="both", expand=False, padx=5, pady=5)
 
   def show_ta():
+    global debug
+    debug = True
     ta.pack(fill="both", expand=False, padx=5, pady=5)
     sl.configure(command=hide_ta)
 
   def hide_ta():
+    global debug
+    debug = False
     ta.pack_forget(); sl.configure(command=show_ta)
 
   sl = ttk.Checkbutton(master=root, style="Switch.TCheckbutton", text="show debug log",

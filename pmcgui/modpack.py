@@ -33,7 +33,10 @@ def get_modpack(ubase: str, name: str, cb) -> portablemc.standard.Version:
     url = f"https://{resolvable[ubase]}/{name}.pmcpack"
     log(f"{ubase} is resolvable, using {url} as url")
   else:
-    url = f"https://{ubase}/{name}.pmcpack"
+    if ubase.startswith('http'):
+      url = f"{ubase}/{name}.pmcpack"
+    else:
+      url = f"https://{ubase}/{name}.pmcpack"
     log(f"modpack: using {url} as url")
 
   base = common.get_base_dir()
