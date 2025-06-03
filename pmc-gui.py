@@ -24,7 +24,7 @@ from pmcgui.common import get_mc_location
 import pmcgui.moddl  as moddl
 import pmcgui.cfscrape as cfscrape
 import pmcgui.modpack as mp
-from pmcgui.v import *
+from pmcgui.v import *          #
 import pmcgui.auth as auth
 
 default_jvm_opts = "-Xmx2G -XX:+UnlockExperimentalVMOptions -XX:+UseG1GC -XX:G1NewSizePercent=20 -XX:G1ReservePercent=20 -XX:MaxGCPauseMillis=50 -XX:G1HeapRegionSize=32M"
@@ -53,7 +53,7 @@ class PMCRunner(StreamRunner):
     else:
       log(f"PortableMC: {event}")
 
-class PMCWatcher:
+class PMCWatcher(Watcher):
   def handle(self, ev: Any):
     if type(ev) is DownloadProgressEvent:
       if debug:
@@ -115,7 +115,7 @@ def start_minecraft():
   v_text: str = v_ent.get()
   nick: str = n_ent.get()
   log(f"loading minecraft: v: {v_text}, nick: {nick}")
-  v: Version = None
+  v: Version | None = None
   try:
     v = get_version(v_text, set_progress, PMCWatcher())
   except Exception as e:
