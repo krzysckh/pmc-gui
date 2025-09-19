@@ -131,7 +131,7 @@ def get_version(v_text, set_progress, nick, watcher=None) -> [Version, List[str]
     modded = True
     ubase = m.group(1)
     name = m.group(2)
-    v = mp.get_modpack(ubase, name, set_progress)
+    [v, _] = mp.get_modpack(ubase, name, set_progress)
 
     if ubase == 'kpm' and name == 'bta':
       args = ['--username', nick]

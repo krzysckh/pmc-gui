@@ -24,7 +24,7 @@ def get_modpack(ubase: str, name: str, cb) -> portablemc.standard.Version:
     if data['loaded-modpack'] == name:
       log(f'modpack {name} already loaded, launching game')
       version = data['modpack-game-version']
-      ver = v.get_version(version, cb)
+      ver = v.get_version(version, cb, "___unknown")
       common.save_data(name, version)
       return ver
 
@@ -65,7 +65,7 @@ def get_modpack(ubase: str, name: str, cb) -> portablemc.standard.Version:
     additional = list(filter(lambda s: s.startswith("additional-files") and zipfile.Path(z, s).is_file(), z.namelist()))
 
     log(f'found {len(mods)} mods')
-    log(f'found {len(additional)} additional files')
+    log(f'found {len(additional)} additional files: {additional}')
 
     mc = common.get_mc_location()
     modpath = os.path.join(mc, "mods")
@@ -90,15 +90,17 @@ def get_modpack(ubase: str, name: str, cb) -> portablemc.standard.Version:
     for i, a in enumerate(additional):
       nam = os.path.normpath(os.path.join(mc, a[17:]))
       if not os.path.exists(os.path.dirname(nam)):
+        log(f'creating {os.path.dirname(nam)}')
         os.makedirs(os.path.dirname(nam))
 
       p = os.path.join(mc, nam)
       if not os.path.exists(p):
         with open(p, 'wb') as f:
+          log(f'writing {p}')
           f.write(z.read(a))
 
       cb(i+1, len(additional))
 
-    ver = v.get_version(version, cb)
+    ver = v.get_version(version, cb, '___unknown')
     common.save_data(name, version)
     return ver
