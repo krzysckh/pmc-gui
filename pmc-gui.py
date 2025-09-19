@@ -116,8 +116,9 @@ def start_minecraft():
   nick: str = n_ent.get()
   log(f"loading minecraft: v: {v_text}, nick: {nick}")
   v: Version | None = None
+  args = []
   try:
-    v = get_version(v_text, set_progress, PMCWatcher())
+    [v, args] = get_version(v_text, set_progress, nick, PMCWatcher())
   except Exception as e:
     log(f"Couldn't start {v_text}: {str(e)}")
     reset_btns()
@@ -141,6 +142,9 @@ def start_minecraft():
     log(f"couldn't install() {v_text}: {str(e)}")
     reset_btns()
     return
+
+  for a in args:
+    env.game_args.append(a)
 
   log(f"starting Minecraft {v_text}...")
   try:

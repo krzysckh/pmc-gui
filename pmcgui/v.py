@@ -104,7 +104,8 @@ def get_optifine_newest(watcher=None) -> Version:
   log(f"get_optifine_newest version name: {name}")
   return Version(name)
 
-def get_version(v_text, set_progress, watcher=None) -> Version:
+def get_version(v_text, set_progress, nick, watcher=None) -> [Version, List[str]]:
+  args = []
   v = None
   modded = False
   if v_text == "newest" or v_text == "latest":
@@ -131,10 +132,16 @@ def get_version(v_text, set_progress, watcher=None) -> Version:
     ubase = m.group(1)
     name = m.group(2)
     v = mp.get_modpack(ubase, name, set_progress)
+
+    if ubase == 'kpm' and name == 'bta':
+      args = ['--username', nick]
+  elif v_text == "testing":
+    v = Version()
+    # v._jar_path = "/home/kpm/Pobrane/bta.v7.3_04.client.jar"
   else:
     v = Version(v_text)
 
   if not modded:
     common.save_data(None, None)
 
-  return v
+  return [v, args]
