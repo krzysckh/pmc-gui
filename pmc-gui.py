@@ -11,7 +11,7 @@ import os
 import json
 import sys
 import subprocess
-from functools import cmp_to_key
+# from functools import cmp_to_key
 
 import tkinter
 from tkinter import ttk
@@ -22,12 +22,10 @@ import pmcgui.common as common
 from pmcgui.common import log
 from pmcgui.common import get_mc_location
 import pmcgui.moddl  as moddl
-import pmcgui.cfscrape as cfscrape
+# import pmcgui.cfscrape as cfscrape
 import pmcgui.modpack as mp
-from pmcgui.v import *          #
+from pmcgui.v import *
 import pmcgui.auth as auth
-
-default_jvm_opts = "-Xmx2G -XX:+UnlockExperimentalVMOptions -XX:+UseG1GC -XX:G1NewSizePercent=20 -XX:G1ReservePercent=20 -XX:MaxGCPauseMillis=50 -XX:G1HeapRegionSize=32M"
 
 v_ent: ttk.Entry
 n_ent: ttk.Entry
@@ -37,7 +35,6 @@ ta: tkinter.Text
 sl: ttk.Checkbutton
 progressv: tkinter.IntVar
 progress: ttk.Progressbar
-jvm_opts: str = default_jvm_opts
 
 debug: bool = False
 
@@ -78,14 +75,14 @@ def open_readme() -> None:
   t.configure(state=tkinter.DISABLED)
 
 def setjopts() -> None:
-  global jvm_opts
   w = tkinter.Toplevel()
   t = tkinter.Text(master=w)
   t.pack(expand=True, padx=5)
-  t.insert('end', jvm_opts)
+  t.insert('end', common.get_jvm_opts())
   w.resizable(width=False, height=False)
   def close():
-    jvm_opts = t.get("1.0", "end-1c")
+    common.set_jvm_opts(t.get("1.0", "end-1c"))
+    common.save_data(jvm_opts=common.get_jvm_opts())
     w.destroy()
   b = ttk.Button(master=w, text="Ok", command=close)
   b.pack(fill="both", expand=False, padx=5, pady=5)
@@ -137,7 +134,9 @@ def start_minecraft():
   env: Environment
   try:
     env = v.install(watcher=PMCWatcher())
-    env.jvm_args.extend(jvm_opts.split(' '))
+    jopt = common.get_jvm_opts()
+    env.jvm_args.extend(jopt.split(' '))
+    common.save_data(jvm_opts=jopt)
   except Exception as e:
     log(f"couldn't install() {v_text}: {str(e)}")
     reset_btns()
@@ -170,6 +169,10 @@ def reset_btns() -> None:
 def load_prefs() -> None:
   try:
     pp = common.get_prefs_path()
+    d = common.get_data()
+    log(f"data: {d}")
+    if 'jvm-opts' in d:
+      common.set_jvm_opts(d['jvm-opts'])
     if os.path.exists(pp):
       with open(pp, "r") as f:
         p = json.loads(f.read())
@@ -194,8 +197,12 @@ def save_prefs() -> None:
   with open(pp, "w") as f:
     f.write(json.dumps({'uname': n_ent.get(), 'version': v_ent.get()}))
 
+def safely_exit(v: int=0) -> None:
+  save_prefs()
+  sys.exit(v)
+
 def main():
-  global v_ent, n_ent, info_text, start_btn, ta, base_dir, progressv, progress
+  global v_ent, n_ent, start_btn, ta, base_dir, progressv, progress
 
   # %APPDATA%/pmc-gui on windows, ~/.local/share/pmc-gui on unix
   base_dir = common.get_base_dir()
@@ -255,6 +262,7 @@ def main():
   optsm.add_command(label="Open minecraft folder", command=lambda: opend(get_mc_location()))
   optsm.add_command(label="Open pmc-gui folder", command=lambda: opend(base_dir))
   optsm.add_command(label="Set jvm options", command=setjopts)
+  optsm.add_command(label="Quit", command=safely_exit)
 
   modsm = tkinter.Menu(mb, tearoff=0)
   modsm.add_command(label="Mod menu", command=moddl.openwindow)
@@ -269,7 +277,7 @@ def main():
   sv_ttk.set_theme("dark")
   common.loadicon(root)
   write_lp_json()
-  root.protocol("WM_DELETE_WINDOW", lambda: [save_prefs(), sys.exit()])
+  root.protocol("WM_DELETE_WINDOW", lambda: safely_exit(0))
   load_prefs()
 
   log("READY")
