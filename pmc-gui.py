@@ -16,6 +16,9 @@ import subprocess
 import tkinter
 from tkinter import ttk
 import sv_ttk
+from pathlib import Path
+import pathlib
+import shutil
 
 import pmcgui.cfauth as cfauth
 import pmcgui.common as common
@@ -54,6 +57,7 @@ class PMCWatcher(Watcher):
   def handle(self, ev: Any):
     if type(ev) is DownloadProgressEvent:
       if debug:
+        e: DownloadProgressEvent = ev
         set_progress(ev.size, ev.entry.size)
 
 def opend(path) -> None:
@@ -87,6 +91,20 @@ def setjopts() -> None:
   b = ttk.Button(master=w, text="Ok", command=close)
   b.pack(fill="both", expand=False, padx=5, pady=5)
 
+def setbase() -> None:
+  w = tkinter.Toplevel()
+  t = tkinter.Text(master=w)
+  t.pack(expand=True, padx=5)
+  t.insert('end', common.get_base_game_folder())
+  w.resizable(width=False, height=False)
+  def close():
+    common.set_base_game_folder(t.get("1.0", "end-1c"))
+    common.save_data(base_folder=common.get_base_game_folder())
+    w.destroy()
+  b = ttk.Button(master=w, text="Ok", command=close)
+  b.pack(fill="both", expand=False, padx=5, pady=5)
+
+
 def write_lp_json() -> None:
   mc_location = get_mc_location()
   lp_json_location = os.path.join(mc_location, "launcher_profiles.json")
@@ -116,6 +134,7 @@ def start_minecraft():
   args = []
   try:
     [v, args] = get_version(v_text, set_progress, nick, PMCWatcher())
+    v.context = Context(main_dir=Path(common.get_base_game_folder()))
   except Exception as e:
     log(f"Couldn't start {v_text}: {str(e)}")
     reset_btns()
@@ -156,6 +175,13 @@ def start_minecraft():
   log(f"Minecraft {v_text} exited successfully")
   reset_btns()
 
+def cloneoptions() -> None:
+  if not Path(common.get_mc_location()).is_dir():
+    Path(common.get_mc_location()).mkdir()
+
+  shutil.copyfile(str(Path(get_minecraft_dir()) / 'options.txt'),
+                  str(Path(common.get_mc_location()) / 'options.txt'))
+
 def set_btns_state(s) -> None:
   start_btn.config(state=s)
   # ...
@@ -173,6 +199,9 @@ def load_prefs() -> None:
     log(f"data: {d}")
     if 'jvm-opts' in d:
       common.set_jvm_opts(d['jvm-opts'])
+    if 'base-folder' in d:
+      common.set_base_game_folder(d['base-folder'])
+
     if os.path.exists(pp):
       with open(pp, "r") as f:
         p = json.loads(f.read())
@@ -263,6 +292,8 @@ def main():
   optsm.add_command(label="Open minecraft folder", command=lambda: opend(get_mc_location()))
   optsm.add_command(label="Open pmc-gui folder", command=lambda: opend(base_dir))
   optsm.add_command(label="Set jvm options", command=setjopts)
+  optsm.add_command(label="Set pmc-gui base game folder", command=setbase)
+  optsm.add_command(label="Clone options.txt from default game folder", command=cloneoptions)
   optsm.add_command(label="Quit", command=safely_exit)
 
   modsm = tkinter.Menu(mb, tearoff=0)
