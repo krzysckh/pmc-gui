@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=pmc-gui
+StartupWMClass=pmc-gui
+Comment=Block Game launcher based on PortableMC
+GenericName=Minecraft launcher
+Exec=/usr/bin/pmc-gui
+Icon=pmc-gui
+Type=Application
+Categories=Game
+Path=/usr/bin

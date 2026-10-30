@@ -1,0 +1,11 @@
+Package: pmc-gui
+Version: 1.0.0
+Maintainer: kpm <kpm@krzysckh.org>
+Section: games
+Priority: optional
+Architecture: amd64
+Bugs: https://github.com/krzysckh/pmc-gui
+Homepage: https://krzysckh.org/prog/pmc-gui.html
+Description: Block Game launcher.
+ pmc-gui is a launcher for a Game with Blocks.
+ It is a tiny GUI wrapper around the python portablemc library.

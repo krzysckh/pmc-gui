@@ -34,3 +34,6 @@ clean:
 common-sense:
 	$(MAKE) clean dist/pmc-gui-winlegacy.exe
 	cd dist && yes | pubcpy pmc-gui-winlegacy.exe
+pmc-gui.deb: dist/pmc-gui
+	cd opt && ./build-deb.sh ../dist/pmc-gui-linux-x86-64
+	mv opt/pmc-gui.deb pmc-gui.deb

@@ -9,3 +9,5 @@ TAGS
 bin
 lib*
 pyvenv*
+*.deb
+opt/pmc-gui
